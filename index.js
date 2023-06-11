@@ -30,6 +30,7 @@ async function run() {
 
     // Database collections
     const studentCollection = client.db("summerFun").collection("students");
+    const classCollection = client.db("summerFun").collection("classes");
 
     // Student related API
     app.post("/students", async (req, res) => {
@@ -43,6 +44,14 @@ async function run() {
         const result = await studentCollection.insertOne(student);
         res.send(result);
       }
+    });
+
+    // Class related api
+
+    app.post("/classes", async (req, res) => {
+      const newClass = req.body;
+      const result = await classCollection.insertOne(newClass);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
