@@ -33,6 +33,7 @@ async function run() {
     const classCollection = client.db("summerFun").collection("classes");
 
     // Student related API
+    // Posting student data to server
     app.post("/students", async (req, res) => {
       const student = req.body;
       console.log(student, "Google");
@@ -46,11 +47,46 @@ async function run() {
       }
     });
 
-    // Class related api
+    // Get student data from server
+    app.get("/students", async (req, res) => {
+      const result = await studentCollection.find().toArray();
+      res.send(result);
+    });
 
+    // Get instructor from server
+    app.get("/students/instructor", async (req, res) => {
+      const query = { role: "instructor" };
+      const result = await studentCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // Get specific admin for admin role (for useAdmin hook)
+    app.get("/students/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await studentCollection.findOne(query);
+      res.send(result);
+    });
+
+    // Get specific instructor for admin role (for useInstructor hook)
+    app.get("/students/instructor/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await studentCollection.findOne(query);
+      res.send(result);
+    });
+
+    // Class related api
+    // Posting class data to the server
     app.post("/classes", async (req, res) => {
       const newClass = req.body;
       const result = await classCollection.insertOne(newClass);
+      res.send(result);
+    });
+
+    // get class data from server
+    app.get("/classes", async (req, res) => {
+      const result = await classCollection.find().toArray();
       res.send(result);
     });
 
