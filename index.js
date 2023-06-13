@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 require("dotenv").config();
 
@@ -60,6 +60,14 @@ async function run() {
       res.send(result);
     });
 
+    /*     //get 6 instructor from server
+    app.get("/instructors/topSix", async (req, res) => {
+      const limit = 6;
+      const query = { role: "instructor" };
+      const result = await studentCollection.find(query).limit(limit).toArray();
+      res.send(result);
+    }); */
+
     // Get specific admin for admin role (for useAdmin hook)
     app.get("/students/admin/:email", async (req, res) => {
       const email = req.params.email;
@@ -68,8 +76,42 @@ async function run() {
       res.send(result);
     });
 
+    // change the role of a student or instructor to admin
+    app.patch("/students/admin/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+
+      const result = await studentCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // change the role of a student to Instructor
+    app.patch("/students/instructor/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "instructor",
+        },
+      };
+      const result = await studentCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     // Get specific instructor for admin role (for useInstructor hook)
     app.get("/students/instructor/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await studentCollection.findOne(query);
+      res.send(result);
+    });
+    // Get specific instructor for admin role (for useInstructor hook)
+    app.get("/students/student/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const result = await studentCollection.findOne(query);
@@ -87,6 +129,26 @@ async function run() {
     // get class data from server
     app.get("/classes", async (req, res) => {
       const result = await classCollection.find().toArray();
+      res.send(result);
+    });
+
+    // Change the class status to approved
+    app.patch("/classes/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "approved",
+        },
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    //get all approved class
+    app.get("/classes/approved", async (req, res) => {
+      const query = { status: "approved" };
+      const result = await classCollection.find(query).toArray();
       res.send(result);
     });
 
