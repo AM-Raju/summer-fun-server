@@ -60,13 +60,13 @@ async function run() {
       res.send(result);
     });
 
-    /*     //get 6 instructor from server
+    //get 6 instructor from server
     app.get("/instructors/topSix", async (req, res) => {
       const limit = 6;
       const query = { role: "instructor" };
       const result = await studentCollection.find(query).limit(limit).toArray();
       res.send(result);
-    }); */
+    });
 
     // Get specific admin for admin role (for useAdmin hook)
     app.get("/students/admin/:email", async (req, res) => {
