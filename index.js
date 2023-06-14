@@ -32,8 +32,9 @@ async function run() {
     const studentCollection = client.db("summerFun").collection("students");
     const classCollection = client.db("summerFun").collection("classes");
     const selectedClassCollection = client.db("summerFun").collection("selectedClasses");
+    const enrolledClassCollection = client.db("summerFun").collection("enrolledClass");
 
-    // Student related API
+    // Admin, instructor, and student related API
     // Posting student data to server
     app.post("/students", async (req, res) => {
       const student = req.body;
@@ -76,6 +77,21 @@ async function run() {
       res.send(result);
     });
 
+    // Get specific instructor for admin role (for useInstructor hook)
+    app.get("/students/instructor/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await studentCollection.findOne(query);
+      res.send(result);
+    });
+    // Get specific instructor for admin role (for useInstructor hook)
+    app.get("/students/student/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await studentCollection.findOne(query);
+      res.send(result);
+    });
+
     // change the role of a student or instructor to admin
     app.patch("/students/admin/:id", async (req, res) => {
       const id = req.params.id;
@@ -103,21 +119,6 @@ async function run() {
       res.send(result);
     });
 
-    // Get specific instructor for admin role (for useInstructor hook)
-    app.get("/students/instructor/:email", async (req, res) => {
-      const email = req.params.email;
-      const query = { email: email };
-      const result = await studentCollection.findOne(query);
-      res.send(result);
-    });
-    // Get specific instructor for admin role (for useInstructor hook)
-    app.get("/students/student/:email", async (req, res) => {
-      const email = req.params.email;
-      const query = { email: email };
-      const result = await studentCollection.findOne(query);
-      res.send(result);
-    });
-
     // Class related api
     // Posting class data to the server
     app.post("/classes", async (req, res) => {
@@ -135,20 +136,12 @@ async function run() {
       };
       const existingClass = await selectedClassCollection.findOne(query);
 
-      console.log(selectedClass, query, existingClass);
-
       if (existingClass) {
         res.send({ message: "Class already selected" });
       } else {
         const result = await selectedClassCollection.insertOne(selectedClass);
         res.send(result);
       }
-    });
-
-    // get class data from server
-    app.get("/classes", async (req, res) => {
-      const result = await classCollection.find().toArray();
-      res.send(result);
     });
 
     // Change the class status to approved
@@ -161,6 +154,12 @@ async function run() {
         },
       };
       const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    // get class data from server
+    app.get("/classes", async (req, res) => {
+      const result = await classCollection.find().toArray();
       res.send(result);
     });
 
@@ -179,6 +178,13 @@ async function run() {
       res.send(result);
     });
 
+    // get popular classes based on enrollment
+    app.get("/classes/enrolled", async (req, res) => {
+      const result = await enrolledClassCollection.find().sort({ enrolled: 1 }).toArray();
+      res.send(result);
+    });
+
+    // Get selected classes based on student
     app.get("/selectedClasses/:email", async (req, res) => {
       const email = req.params.email;
       const query = { studentEmail: email };
