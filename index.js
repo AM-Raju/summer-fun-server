@@ -31,18 +31,30 @@ async function run() {
     // Database collections
     const studentCollection = client.db("summerFun").collection("students");
     const classCollection = client.db("summerFun").collection("classes");
+    const selectedClassCollection = client.db("summerFun").collection("selectedClasses");
 
     // Student related API
     // Posting student data to server
     app.post("/students", async (req, res) => {
       const student = req.body;
-      console.log(student, "Google");
       const query = { email: student.email };
       const existingUser = await studentCollection.findOne(query);
       if (existingUser) {
         res.send({ message: "User already exists." });
       } else {
         const result = await studentCollection.insertOne(student);
+        res.send(result);
+      }
+    });
+
+    app.post("/selectedClasses", async (req, res) => {
+      const selectedClass = req.body;
+      const query = { className: selectedClass?.name };
+      const existingClass = await selectedClassCollection.findOne(query);
+      if (existingClass) {
+        res.send({ message: "Class already selected" });
+      } else {
+        const result = await selectedClassCollection.insertOne(selectedClass);
         res.send(result);
       }
     });
@@ -125,6 +137,8 @@ async function run() {
       const result = await classCollection.insertOne(newClass);
       res.send(result);
     });
+
+    // Posting selected classes to the server
 
     // get class data from server
     app.get("/classes", async (req, res) => {
