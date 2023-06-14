@@ -47,18 +47,6 @@ async function run() {
       }
     });
 
-    app.post("/selectedClasses", async (req, res) => {
-      const selectedClass = req.body;
-      const query = { className: selectedClass?.name };
-      const existingClass = await selectedClassCollection.findOne(query);
-      if (existingClass) {
-        res.send({ message: "Class already selected" });
-      } else {
-        const result = await selectedClassCollection.insertOne(selectedClass);
-        res.send(result);
-      }
-    });
-
     // Get student data from server
     app.get("/students", async (req, res) => {
       const result = await studentCollection.find().toArray();
@@ -139,6 +127,23 @@ async function run() {
     });
 
     // Posting selected classes to the server
+    app.post("/selectedClasses", async (req, res) => {
+      const selectedClass = req.body;
+      const query = {
+        className: selectedClass?.className,
+        studentEmail: selectedClass?.studentEmail,
+      };
+      const existingClass = await selectedClassCollection.findOne(query);
+
+      console.log(selectedClass, query, existingClass);
+
+      if (existingClass) {
+        res.send({ message: "Class already selected" });
+      } else {
+        const result = await selectedClassCollection.insertOne(selectedClass);
+        res.send(result);
+      }
+    });
 
     // get class data from server
     app.get("/classes", async (req, res) => {
@@ -171,6 +176,13 @@ async function run() {
       const email = req.params.email;
       const query = { instructorEmail: email };
       const result = await classCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/selectedClasses/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { studentEmail: email };
+      const result = await selectedClassCollection.find(query).toArray();
       res.send(result);
     });
 
